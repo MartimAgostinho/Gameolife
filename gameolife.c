@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#define x  10
-#define y  10
+#define DIMX  96
+#define DIMY  42
+#define DCHAR '.'
+#define LCHAR '#'
 
 void print_game(int dimy,int dimx,char matrx[dimy][dimx]){
 
@@ -9,10 +12,19 @@ void print_game(int dimy,int dimx,char matrx[dimy][dimx]){
         
         for(int j = 0;j < dimx;++j){
             
-            if( matrx[i][j] ){ printf("#"); }
-            else{printf(" ");}
-            
+            if( matrx[i][j] ){ printf("%c",LCHAR); }
+            else{printf("%c",DCHAR);}
+        }//printf("\n");
+    }
+}
+
+void print_matrix(int dimy,int dimx,char matrx[dimy][dimx]){
+
+    for(int i = 0;i < dimy;++i){
         
+        for(int j = 0;j < dimx;++j){
+            
+            printf("%c",matrx[i][j]);
         }printf("\n");
     }
 }
@@ -23,11 +35,10 @@ void char_matrix(int dimy,int dimx,char matrx[dimy][dimx]){
         
         for(int j = 0;j < dimx;++j){
 
-            if( matrx[i][j] ){ matrx[i][j] = '#'; }
-            else{ matrx[i][j] = ' '; }
+            if( matrx[i][j] ){ matrx[i][j] = LCHAR; }
+            else{ matrx[i][j] = DCHAR; }
         }
     }
-
 }
 
 //0, acontece nada , 1 - cell morre , 2 -cell criada
@@ -59,17 +70,99 @@ char cell_status(int dimy,int dimx,char matrx[dimy][dimx],int posy,int posx){
     return 0;   
 }
 
+void cpy_matrix(int dimy,int dimx,char matrx[dimy][dimx],char cpy[dimy][dimx]){
+    
+    for(int i = 0;i < dimy;++i){
+        
+        for(int j = 0;j < dimx;++j){
+            cpy[i][j] = matrx[i][j];            
+        }
+    }
+}
+
+void fill_matrx(int dimy,int dimx,char matrx[dimy][dimx]){
+
+    char matr_aux[dimy][dimx];
+    char inp = 0;
+    int posx = 0, posy = 0; 
+    int i,j;
+
+    for(i = 0;i < dimy;++i){
+
+        for(j = 0;j < dimx;++j ){
+            if( matrx[i][j] ){ matr_aux[i][j] = LCHAR; }
+            else{ matr_aux[i][j] = DCHAR; }
+        }
+    }
+    
+    system("clear");
+    system("stty cbreak");     //uninterrupted input
+    
+    while(inp != 27){
+        
+        system("clear");
+        if( matr_aux[posy][posx] == LCHAR){ matr_aux[posy][posx] = LCHAR; }
+        else{ matr_aux[posy][posx] = DCHAR; }
+         
+        switch(inp){
+            
+            case 'w':
+                --posy;
+                if(posy == -1){ posy = dimy - 1; }
+                break;
+            
+            case 'a':
+                --posx;
+                if(posx == -1){ posx = dimx - 1; }
+                break;
+            case 's':
+                ++posy;
+                if(posy == dimy){ posy = 0; }
+                break;
+            
+            case 'd':
+                ++posx;
+                if(posx == dimx){ posx = 0; }
+                break;
+            
+            case '\n':
+                if( matrx[posy][posy] ){ 
+                    
+                    //matr_aux[posy][posx] = DCHAR;
+                    matrx[posy][posx] = 0;
+                }
+                else{ 
+                    
+                    //matr_aux[posy][posx] = LCHAR;
+                    matrx[posy][posx] = 1;
+                }
+                break;
+        }
+        
+        for(i = 0;i < dimy;++i){
+
+            for(j = 0;j < dimx;++j ){
+                if( matrx[i][j] ){ matr_aux[i][j] = LCHAR; }
+                else{ matr_aux[i][j] = DCHAR; }
+            }
+        }
+
+        matr_aux[posy][posx] = '*';
+        print_matrix(dimy,dimx,matr_aux);
+        printf("x:%d,y:%d\n",posx,posy);
+        inp = getchar();
+    }
+    system("stty cooked");  // back to normal
+    
+
+}
+
 void game_main(int dimy,int dimx,char matrx[dimy][dimx]){
 
     char out;
     char matraux[dimy][dimx];
 
-    for(int i = 0;i < dimy;++i){
-        
-        for(int j = 0;j < dimx;++j){
-            matraux[i][j] = matrx[i][j];            
-        }
-    }
+    cpy_matrix(dimy,dimx,matrx,matraux);
 
     for(int i = 0;i < dimy;++i){
         
@@ -87,33 +180,32 @@ void game_main(int dimy,int dimx,char matrx[dimy][dimx]){
             
         }//printf("\n");
     }
-    for(int i = 0;i < dimy;++i){
-        
-        for(int j = 0;j < dimx;++j){
-            matrx[i][j] = matraux[i][j] ;            
-        }
-    }
+
+    cpy_matrix(dimy,dimx,matraux,matrx);
 }
 
 int main(){
 
     //unsigned int dimx = 10,dimy = 10;
+    char matrx[DIMY][DIMX] = {0};
     
-    char matrx[y][x] ={ {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,1,0,0,0,0,0},
-                        {0,0,1,0,1,0,0,0,0,0},
-                        {0,0,0,1,1,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0},
-                        {0,0,0,0,0,0,0,0,0,0} };
+    // char matrx[y][x] ={ {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,1,0,0,0,0,0},
+   //                     {0,0,1,0,1,0,0,0,0,0},
+   //                     {0,0,0,1,1,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0},
+   //                     {0,0,0,0,0,0,0,0,0,0} };
+
+    fill_matrx(DIMY,DIMX,matrx);
 
     while(1){
 
-        print_game(y, x, matrx);
-        game_main(y, x, matrx);
+        print_game(DIMY, DIMX, matrx);
+        game_main(DIMY, DIMX, matrx);
         getchar();
         printf("---------------------------\n");
 
